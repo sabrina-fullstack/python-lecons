@@ -1,0 +1,7 @@
+name = input("Enter your name: ")
+city = input("Enter your city: ")
+hobby = input("Enter your hobby: ")
+print("My profile")
+print("Name:", name)
+print("City:", city)
+print("Hobby:", hobby)

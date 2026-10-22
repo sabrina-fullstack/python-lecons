@@ -1,0 +1,5 @@
+food = input("Enter your favorite food: ")
+color = input("Enter your favorite color: ")
+print("My favorites")
+print("Favorite food:", food)
+print("Favorite color:", color)

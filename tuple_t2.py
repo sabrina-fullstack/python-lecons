@@ -1,0 +1,5 @@
+one = (7,)
+number = (7)
+print(one)
+print(number)
+print(len(one))

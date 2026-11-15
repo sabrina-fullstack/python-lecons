@@ -1,7 +1,7 @@
 import jwt
 import pymysql
 from datetime import datetime, timedelta, timezone
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 SECRET = "une-longue-cle-secrete-de-test-1234567890"
@@ -58,17 +58,37 @@ def login():
     return jsonify({"token": token})
 
 
-@app.get("/me")
-def me():
+PUBLIC_ROUTES = ["/login", "/register"]
+
+
+@app.before_request
+def check_token():
+    if request.path in PUBLIC_ROUTES:
+        return None
     header = request.headers.get("Authorization", "")
     if not header.startswith("Bearer "):
         return jsonify({"error": "token missing"}), 401
     token = header.split(" ")[1]
     try:
-        data = jwt.decode(token, SECRET, algorithms=["HS256"])
+        g.current_user = jwt.decode(token, SECRET, algorithms=["HS256"])
     except jwt.InvalidTokenError:
         return jsonify({"error": "invalid token"}), 401
-    return jsonify({"user_id": data["user_id"], "role": data["role"]})
+
+
+def is_admin():
+    return g.current_user["role"] == "admin"
+
+
+@app.get("/me")
+def me():
+    return jsonify({"user_id": g.current_user["user_id"], "role": g.current_user["role"]})
+
+
+@app.get("/admin")
+def admin_only():
+    if not is_admin():
+        return jsonify({"error": "admin only"}), 403
+    return jsonify({"message": "welcome admin"})
 
 
 if __name__ == "__main__":
